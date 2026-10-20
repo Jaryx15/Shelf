@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shelf — Local Media Server</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B57D0'/><rect x='16' y='24' width='68' height='14' rx='4' fill='white'/><rect x='16' y='46' width='46' height='14' rx='4' fill='%23A8C8FF'/><rect x='16' y='68' width='58' height='14' rx='4' fill='%23A8C8FF'/></svg>">
+</head>
+<body data-theme="dark">
+
+<div id="shell">
+  <!-- Navigation drawer -->
+  <aside id="drawer" aria-label="Library navigation">
+    <div class="drawer-head">
+      <div class="logo"><span class="material-symbols-rounded">library_books</span></div>
+      <div class="logo-text">
+        <strong>Shelf</strong>
+        <small>local media server</small>
+      </div>
+    </div>
+    <nav class="drawer-nav" id="drawerNav">
+      <a class="nav-item" href="#/" data-nav="home"><span class="material-symbols-rounded">home</span><span class="nav-label">Home</span></a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="#/browse/Videos" data-nav="Videos"><span class="material-symbols-rounded">movie</span><span class="nav-label">Videos</span></a>
+      <a class="nav-item" href="#/browse/Music" data-nav="Music"><span class="material-symbols-rounded">music_note</span><span class="nav-label">Music</span></a>
+      <a class="nav-item" href="#/browse/Images" data-nav="Images"><span class="material-symbols-rounded">image</span><span class="nav-label">Images</span></a>
+      <a class="nav-item" href="#/browse/Documents" data-nav="Documents"><span class="material-symbols-rounded">description</span><span class="nav-label">Documents</span></a>
+    </nav>
+    <div class="drawer-foot" id="storageSummary" title="Library storage"></div>
+  </aside>
+  <div id="drawerScrim"></div>
+
+  <div id="main">
+    <!-- Top app bar -->
+    <header id="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu"><span class="material-symbols-rounded">menu</span></button>
+      <h1 id="pageTitle">Home</h1>
+      <div class="topbar-spacer"></div>
+      <div class="search-field" id="searchField">
+        <span class="material-symbols-rounded">search</span>
+        <input type="search" id="searchInput" placeholder="Search your library" autocomplete="off">
+        <button class="icon-btn small" id="searchClear" hidden><span class="material-symbols-rounded">close</span></button>
+      </div>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><span class="material-symbols-rounded">brightness_4</span></button>
+      <button class="filled-btn" id="uploadBtn"><span class="material-symbols-rounded">upload</span><span class="btn-label">Upload</span></button>
+    </header>
+
+    <main id="content" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- Persistent music player bar -->
+<div id="playerBar" hidden>
+  <div class="pb-seek" id="pbSeek" role="slider" tabindex="0" aria-label="Seek">
+    <div class="pb-seek-track"><div class="pb-seek-fill" id="pbSeekFill"></div><div class="pb-seek-thumb" id="pbSeekThumb"></div></div>
+  </div>
+  <div class="pb-inner">
+    <div class="pb-meta" id="pbMeta">
+      <img class="pb-art" id="pbArt" alt="" hidden>
+      <div class="pb-art fallback" id="pbArtFallback"><span class="material-symbols-rounded">music_note</span></div>
+      <div class="pb-text">
+        <div class="pb-title" id="pbTitle">—</div>
+        <div class="pb-artist" id="pbArtist"></div>
+      </div>
+      <button class="icon-btn small" id="pbExpand" title="Queue"><span class="material-symbols-rounded">queue_music</span></button>
+    </div>
+    <div class="pb-controls">
+      <button class="icon-btn" id="pbShuffle" title="Shuffle"><span class="material-symbols-rounded">shuffle</span></button>
+      <button class="icon-btn" id="pbPrev" title="Previous"><span class="material-symbols-rounded">skip_previous</span></button>
+      <button class="fab-play" id="pbPlay" title="Play/Pause"><span class="material-symbols-rounded">play_arrow</span></button>
+      <button class="icon-btn" id="pbNext" title="Next"><span class="material-symbols-rounded">skip_next</span></button>
+      <button class="icon-btn" id="pbRepeat" title="Repeat"><span class="material-symbols-rounded">repeat</span></button>
+    </div>
+    <div class="pb-time"><span id="pbCur">0:00</span><span class="pb-dash">/</span><span id="pbDur">0:00</span></div>
+    <div class="pb-right">
+      <button class="icon-btn small" id="pbMute" title="Volume"><span class="material-symbols-rounded">volume_up</span></button>
+      <input type="range" id="pbVolume" min="0" max="1" step="0.01" value="1" class="vol-slider" aria-label="Volume">
+    </div>
+  </div>
+</div>
+
+<!-- Queue drawer -->
+<aside id="queueDrawer" aria-label="Play queue">
+  <div class="qd-head">
+    <strong>Up next</strong>
+    <div class="qd-actions">
+      <button class="text-btn small" id="qdClear">Clear</button>
+      <button class="icon-btn small" id="qdClose"><span class="material-symbols-rounded">close</span></button>
+    </div>
+  </div>
+  <div class="qd-list" id="qdList"></div>
+</aside>
+
+<!-- Overlays -->
+<div id="overlayRoot"></div>
+<div id="toastHost"></div>
+
+<div id="dropOverlay">
+  <div class="drop-card">
+    <span class="material-symbols-rounded">upload</span>
+    <strong>Drop to upload</strong>
+    <small id="dropTarget">to Library</small>
+  </div>
+</div>
+
+<input type="file" id="fileInput" multiple hidden>
+<input type="file" id="folderInput" webkitdirectory hidden>
+
+<script defer src="/static/app.js"></script>
+<script defer src="/static/player.js"></script>
+<script defer src="/static/views.js"></script>
+<script defer src="/static/boot.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+SHELF — Getting Started
+======================
+
+Welcome! This is your local media server.
+
+* Drop files here (or use the Upload button) to store videos,
+  images, documents, music and manga.
+* Click a video or song to play it right in the browser.
+* Open any .cbz or folder of images as a manga reader.
+
+Keyboard shortcuts
+------------------
+Video:  Space play/pause · ← → seek · F fullscreen · M mute
+Manga:  ← → pages · Space next · 1/2 single/double · S strip
+Music:  Media keys work when a song is playing.
