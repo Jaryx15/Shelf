@@ -10,7 +10,7 @@ A local media server for videos, music, images, and documents. Stream with HTTP 
 - **Documents**: View PDF (inline), Markdown, HTML, and plain text
 - **Management**: Upload (files/folders/drag-drop), create folders, rename, delete, download
 - **Responsive**: Mobile-friendly layout, floating upload button on small screens
-- **Network access**: Listen on all interfaces (`--host 0.0.0.0`)
+- **Network access**: Listens on all interfaces by default (`--host 0.0.0.0`)
 - **Auth (optional)**: Password protect with `SHELF_PASSWORD`
 
 ## Quick start
@@ -18,12 +18,21 @@ A local media server for videos, music, images, and documents. Stream with HTTP 
 pip install -r requirements.txt
 python3 server.py
 ```
-Open http://127.0.0.1:8123
+The startup banner prints both a **Local** URL (`http://127.0.0.1:8123`) and a
+**Network** URL such as `http://192.168.1.25:8123`. Open the Network URL on your
+phone, tablet, or another computer on the same Wi-Fi/LAN.
+
+> `0.0.0.0` is a bind address, not a destination. Don't enter
+> `http://0.0.0.0:8123` on another device — use the Network URL from the banner.
+
+If a device still can't connect, allow TCP port `8123` through the host
+computer's firewall and make sure the router/AP isn't isolating wireless clients.
 
 ## Options
 ```bash
 python3 server.py --host 0.0.0.0 --port 8123 --library ./library
 ```
+Use `--host 127.0.0.1` to restrict access to the local machine only.
 
 ## Password protection
 ```bash

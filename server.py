@@ -14,6 +14,7 @@ import mimetypes
 import os
 import re
 import shutil
+import socket
 import subprocess
 import time
 from functools import wraps
@@ -466,15 +467,32 @@ def api_thumb():
 # Main
 # ---------------------------------------------------------------------------
 
+def lan_ipv4_addresses():
+    """Best-effort list of IPv4 addresses other devices can use to reach us."""
+    found = set()
+    # Address used for outbound traffic. UDP connect doesn't send any packets.
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            found.add(s.getsockname()[0])
+    except OSError:
+        pass
+    # Other addresses assigned to this host (Wi-Fi, Ethernet, etc.).
+    try:
+        infos = socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET, socket.SOCK_STREAM)
+        found.update(info[4][0] for info in infos)
+    except OSError:
+        pass
+    return sorted(ip for ip in found
+                  if ip != "0.0.0.0" and not ip.startswith(("127.", "169.254.")))
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     global LIBRARY
     ap = argparse.ArgumentParser(description="Shelf — local media server")
-    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--host", default="0.0.0.0",
+                    help="Bind address (default: 0.0.0.0 — all interfaces; "
+                         "use 127.0.0.1 for local-only access)")
     ap.add_argument("--port", type=int, default=8123)
     ap.add_argument("--library", default=None, help="Media library directory (default: ./library)")
     args = ap.parse_args()
@@ -483,14 +501,27 @@ def main():
         LIBRARY = Path(args.library).expanduser().resolve()
     ensure_library()
 
-    print(f"""
-  ┌───────────────────────────────────────────┐
-  │  Shelf — local media server               │
-  │                                           │
-  │  Library : {LIBRARY}
-  │  Open    : http://{args.host}:{args.port}
-  └───────────────────────────────────────────┘
-""")
+    wildcard = args.host in ("0.0.0.0", "::", "")
+    if wildcard:
+        urls = [("Local", f"http://127.0.0.1:{args.port}")]
+        urls += [("Network", f"http://{ip}:{args.port}") for ip in lan_ipv4_addresses()]
+    else:
+        urls = [("Open", f"http://{args.host}:{args.port}")]
+
+    print("\n  Shelf — local media server\n")
+    print(f"  Library : {LIBRARY}")
+    for label, url in urls:
+        print(f"  {label:<7} : {url}")
+    if wildcard and len(urls) > 1:
+        print("\n  Open a Network URL on your phone/tablet (same Wi-Fi/LAN).")
+    if wildcard:
+        print(f"  If another device still can't connect, allow TCP port {args.port} "
+              "through this computer's firewall.")
+    else:
+        print("\n  This server is only reachable from this machine. "
+              "Use --host 0.0.0.0 to allow other devices.")
+    print()
+
     app.run(host=args.host, port=args.port, threaded=True, debug=False)
 
 

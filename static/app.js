@@ -176,7 +176,7 @@ function closeMenu() { openMenuEl?.remove(); openMenuEl = null; }
 function menu(anchor, items) {
   closeMenu();
   const r = anchor.getBoundingClientRect();
-  const m = el(`<div class="menu-panel" style="position:fixed"></div>`);
+  const m = el(`<div class="menu-panel" style="position:fixed;right:auto"></div>`);
   items.forEach(it => {
     if (it === "-") { m.appendChild(el(`<div class="nav-divider" style="margin:6px 8px"></div>`)); return; }
     const btn = el(`<button class="menu-item ${it.checked ? "checked" : ""}">
@@ -325,8 +325,11 @@ function cardHtml(item, metaLine) {
   return `<button class="media-card" data-path="${esc(item.path)}" data-kind="${item.kind}">
     ${thumbHtml(item, { hoverPlay: true })}
     <div class="card-body">
-      <div class="card-name">${esc(item.name)}</div>
-      <div class="card-meta">${esc(metaLine)}</div>
+      <div class="card-text">
+        <div class="card-name">${esc(item.name)}</div>
+        <div class="card-meta">${esc(metaLine)}</div>
+      </div>
+      <span class="icon-btn small card-menu" data-menu="${esc(item.path)}" role="button" title="More actions" aria-label="More actions for ${esc(item.name)}"><span class="material-symbols-rounded">more_vert</span></span>
     </div>
   </button>`;
 }
@@ -342,15 +345,16 @@ function rowHtml(item, metaLine) {
       <span class="row-sub">${esc(metaLine)}</span>
     </span>
     <span class="row-size">${item.isDir ? "" : fmtSize(item.size)}</span>
-    <span class="icon-btn small row-menu" data-menu="${esc(item.path)}"><span class="material-symbols-rounded">more_vert</span></span>
+    <span class="icon-btn small row-menu" data-menu="${esc(item.path)}" role="button" title="More actions" aria-label="More actions for ${esc(item.name)}"><span class="material-symbols-rounded">more_vert</span></span>
   </button>`;
 }
 
 /** Wire clicks on a container of cards/rows. itemsById: Map path → item */
 function bindItemList(container, itemsById, { onOpen } = {}) {
   container.addEventListener("click", e => {
-    const menuBtn = e.target.closest(".row-menu");
+    const menuBtn = e.target.closest(".row-menu, .card-menu");
     if (menuBtn) {
+      e.preventDefault();
       e.stopPropagation();
       const item = itemsById.get(menuBtn.dataset.menu);
       if (item) Views.itemMenu(menuBtn, item, () => Views.refresh());

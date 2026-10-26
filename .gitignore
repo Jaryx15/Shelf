@@ -1,0 +1,16 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Generated thumbnail / cover cache
+.cache/
+
+# OS / editor cruft
+.DS_Store
